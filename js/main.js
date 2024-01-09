@@ -28,8 +28,9 @@ function createNote() {
 
     let deleteIcon = divNote.querySelector('.delete-icon');
     deleteIcon.addEventListener("click", function () {
-        let noteIdToDelete = parseInt(deleteIcon.getAttribute("data-note-id"));
-        deleteNote(noteIdToDelete);
+        
+        deleteNote(noteId);
+        location.reload();
     });
 
     mainContainerElement.appendChild(divNote);
@@ -81,37 +82,23 @@ function updateNote(id, text) {
         });
 }
 
-function deleteNoteFromHTML(id) {
-    let noteElement = document.querySelector(`[data-note-id="${id}"]`);
-    if (noteElement) {
-        noteElement.parentNode.removeChild(noteElement);
-        console.log("Note element removed from DOM");
-    } else {
-        console.error("Note element not found in DOM");
-    }
-}
-
-function deleteNoteFromDB(id) {
-    return dbManager.open()
-        .then(() => dbManager.deleteData(id))
-        .then(() => {
-            console.log("Nota eliminada de la base de datos");
-        })
-        .catch((error) => {
-            console.error("Error deleteData: " + error);
-            throw error;
-        });
-}
-
 function deleteNote(id) {
-    console.log("Deleting note with ID:", id);
-
-    deleteNoteFromDB(id)
+    dbManager.open()
         .then(() => {
-            deleteNoteFromHTML(id);
+            dbManager.deleteData(id)
+                .then(() => {
+                    console.log("Nota eliminada de la base de datos");
+                    let noteElement = document.querySelector(`[data-note-id="${id}"]`);
+                    if (noteElement) {
+                        noteElement.parentNode.removeChild(noteElement);
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error deleteData: " + error);
+                });
         })
         .catch((error) => {
-            console.error("Error deleteNote: " + error);
+            console.error("Error open: " + error);
         });
 }
 
@@ -134,8 +121,7 @@ function showAllAction() {
                     deleteIcon.className = "fas fa-trash-alt delete-icon";
                     deleteIcon.setAttribute("data-note-id", data.id);
                     deleteIcon.addEventListener("click", function () {
-                        let idToDelete = parseInt(deleteIcon.getAttribute("data-note-id"));
-                        deleteNote(idToDelete);
+                        deleteNote(data.id);
                     });
 
                     noteHeader.appendChild(deleteIcon);
