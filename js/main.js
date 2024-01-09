@@ -5,7 +5,10 @@ let mainContainerElement = document.getElementById("container");
 let buttonAdd = document.getElementById("add");
 
 showAllAction();
-buttonAdd.addEventListener("click", createNote);
+buttonAdd.addEventListener("click",function () {
+    createNote();
+    location.reload();
+});
 
 function generateUniqueId() {
     return Date.now() + Math.floor(Math.random() * 10000);
